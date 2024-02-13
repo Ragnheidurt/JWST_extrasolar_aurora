@@ -29,6 +29,13 @@ for i in range(Data.shape[0]):
         array[i] = wavstart
 
 print(array[Data.shape[0]-1])
+
+low_limit = 3.92e-06
+up_limit = 4.02e-06
+lengd = 0
+for i in range(array.shape[0]):
+    if(array[i]>=low_limit and array[i]<= up_limit):
+        lengd = lengd +1
     
 
 data_slice = Data[1500, :, :]
@@ -37,13 +44,13 @@ max_index = np.unravel_index(np.nanargmax(data_slice), data_slice.shape)
 
 interval = 4.02e-06-3.92e-06
 staerd = interval*bil
-close_wave = np.zeros(staerd,dtype='float32')
-close_value = np.zeros(staerd,dtype='float32')
+close_wave = np.zeros(lengd,dtype='float32')
+close_value = np.zeros(lengd,dtype='float32')
 count = 0
-for i in range(staerd):
+for i in range(array.shape[0]):
     if array[i] >= 3.92e-06 and array[i] <= 4.02e-06:
         close_wave[count] = array[i]
-        close_wave[count] = Data[i,max_index[0],max_index[1]]
+        close_value[count] = Data[i,max_index[0],max_index[1]]
         count = count+1
     
 
