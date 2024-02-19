@@ -3,6 +3,7 @@ from astropy.table import Table
 from astropy.utils.data import get_pkg_data_filename
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 
 testfile = get_pkg_data_filename('jw01189004001_03106_00003_nrs1_s3d.fits')
 fits.info(testfile)
@@ -14,8 +15,8 @@ fits.info(testfile)
 
 Data = fits.getdata(testfile,ext=1)
 header = fits.getheader(testfile,ext=1)
-print(Data.shape)
-print(header)
+#print(Data.shape)
+#print(header)
 wavstart = header['WAVSTART']
 wavend = header['WAVEND']
 dist = wavend-wavstart
@@ -52,6 +53,29 @@ for i in range(array.shape[0]):
         close_wave[count] = array[i]
         close_value[count] = Data[i,max_index[0],max_index[1]]
         count = count+1
+
+Planck = np.zeros(array.shape[0])
+Temp = 600
+h = 6.62607015e-34
+c = 3e8
+kb = 1.380649e-23
+
+for i in range(array.shape[0]):
+    Planck[i] = 5e-6*(2*h*c**2)/(array[i]**5)*1/(math.exp((h*c)/(array[i]*kb*Temp))-1)
+
+
+
+
+    '''
+    if math.exp((h*array[i])/(kb*Temp)) == 1:
+        #print("How the fuck")
+        #print(i)
+        hi = 0
+    else:
+        print("yay")
+        Planck[i] = ((2*h*array[i]**3)/(c**2))*(1/(math.exp(h*array[i]/(kb*Temp))-1))
+    '''
+
     
 
 
@@ -67,6 +91,7 @@ plt.colorbar()
 
 plt.figure(2)
 plt.plot(array[:],Data[:,max_index[0],max_index[1]])
+plt.plot(array[:],Planck[:])
 #plt.show()
 
 plt.figure(3)
