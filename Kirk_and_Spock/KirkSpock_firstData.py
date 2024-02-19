@@ -47,6 +47,44 @@ for i in range(nrs2_data.shape[0]):
     else:
         nrs2_wave[i] = nrs2_wavestart
 
+# Find the brightest spot for each data set
+        
+nrs1_slice = nrs1_data[1500,:,:]
+nrs1_maxindex = np.unravel_index(np.nanargmax(nrs1_slice), nrs1_slice.shape)
+nrs2_slice = nrs2_data[2500,:,:]
+nrs2_maxindex = np.unravel_index(np.nanargmax(nrs2_slice),nrs2_slice.shape)
+
+print(nrs1_maxindex)
+print(nrs2_maxindex)
+
+# Take the average of the brightest pixel and the eight pixels around it
+
+nrs1_avg = np.zeros(nrs1_wave.shape[0])
+a = nrs1_maxindex[0]-1
+b = nrs1_maxindex[0]
+c = nrs1_maxindex[0]+1
+d = nrs1_maxindex[1]-1
+e = nrs1_maxindex[1]
+f = nrs1_maxindex[1]+1
+for i in range(nrs1_avg.shape[0]):
+    nrs1_avg[i] = (nrs1_data[i,a,d]+nrs1_data[i,a,e]+nrs1_data[i,a,f]+nrs1_data[i,b,d]+nrs1_data[i,b,e]+nrs1_data[i,b,f]+nrs1_data[i,c,d]+nrs1_data[i,c,e]+nrs1_data[i,c,f])/9
+    if abs(nrs1_avg[i]) > 1e5 and i != 0:
+        nrs1_avg[i] = nrs1_avg[i-1]
+
+
+nrs2_avg = np.zeros(nrs2_wave.shape[0])
+a = nrs2_maxindex[0]-1
+b = nrs2_maxindex[0]
+c = nrs2_maxindex[0]+1
+d = nrs2_maxindex[1]-1
+e = nrs2_maxindex[1]
+f = nrs2_maxindex[1]+1
+for i in range(nrs2_wave.shape[0]):
+    nrs2_avg[i] = (nrs2_data[i,a,d]+nrs2_data[i,a,e]+nrs2_data[i,a,f]+nrs2_data[i,b,d]+nrs2_data[i,b,e]+nrs2_data[i,b,f]+nrs2_data[i,c,d]+nrs2_data[i,c,e]+nrs2_data[i,c,f])/9
+    if abs(nrs2_avg[i]) > 1e5 and i != 0:
+        nrs2_avg[i] = nrs2_avg[i-1]
+
+
 
 
 plt.figure(1)
@@ -54,8 +92,14 @@ plt.imshow(nrs1_data[1500,:,:])
 plt.colorbar()
 
 plt.figure(2)
-plt.imshow(nrs2_data[1500,:,:])
+plt.imshow(nrs2_data[2500,:,:])
 plt.colorbar()
+
+plt.figure(3)
+plt.plot(nrs1_wave,nrs1_avg)
+
+plt.figure(4)
+plt.plot(nrs2_wave,nrs2_avg)
 
 plt.show()
 
