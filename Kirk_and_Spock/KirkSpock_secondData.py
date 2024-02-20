@@ -7,8 +7,8 @@ import math
 
 
 # Read in files from both sensors
-nrs1 = get_pkg_data_filename('MAST_2024-01-31T15_21_00.167Z\MAST_2024-01-31T15_21_00.167Z\JWST\jw01189004001_03106_00004\jw01189004001_03106_00004_nrs1_s3d.fits')
-nrs2 = get_pkg_data_filename('MAST_2024-01-31T15_21_00.167Z\MAST_2024-01-31T15_21_00.167Z\JWST\jw01189004001_03106_00004\jw01189004001_03106_00004_nrs2_s3d.fits')
+nrs1 = get_pkg_data_filename('MAST_2024-02-20T10_10_20.787Z\MAST_2024-02-20T10_10_20.787Z\JWST\jw01189004001_03106_00001\jw01189004001_03106_00001_nrs1_s3d.fits')
+nrs2 = get_pkg_data_filename('MAST_2024-02-20T10_10_20.787Z\MAST_2024-02-20T10_10_20.787Z\JWST\jw01189004001_03106_00001\jw01189004001_03106_00001_nrs2_s3d.fits')
 
 
 # Extract the data from the files
@@ -90,21 +90,18 @@ for i in range(nrs2_wave.shape[0]):
 
 # Calculating the Planck curve
 nrs1_Planck = np.zeros(nrs1_wave.shape[0])
-Temp = 700
+Temp = 600
 h = 6.62607015e-34
 c = 3e8
 kb = 1.380649e-23
 
 for i in range(nrs1_wave.shape[0]):
-    #nrs1_Planck[i] = 6e-7*(2*h*c**2)/(nrs1_wave[i]**5)*1/(math.exp((h*c)/(nrs1_wave[i]*kb*Temp))-1)
-    nrs1_Planck[i] = (2*h*c**2)/(nrs1_wave[i]**5)*(1/(math.exp((h*c)/(nrs1_wave[i]*kb*Temp))-1))
+    nrs1_Planck[i] = 2e-6*(2*h*c**2)/(nrs1_wave[i]**5)*1/(math.exp((h*c)/(nrs1_wave[i]*kb*Temp))-1)
 
-print((2*h*c**2)/(5e-6**5)*(1/(math.exp((h*c)/(5e-6*kb*Temp))-1)))
 nrs2_Planck = np.zeros(nrs2_wave.shape[0])
 
 for i in range(nrs2_wave.shape[0]):
     nrs2_Planck[i] = 5e-7*(2*h*c**2)/(nrs2_wave[i]**5)*1/(math.exp((h*c)/(nrs2_wave[i]*kb*Temp))-1)
-
 
 
 
