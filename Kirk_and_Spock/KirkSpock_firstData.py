@@ -4,6 +4,8 @@ from astropy.utils.data import get_pkg_data_filename
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+from scipy.signal import savgol_filter
+from scipy import signal
 
 
 # Read in files from both sensors
@@ -57,6 +59,8 @@ nrs1_maxindex = np.unravel_index(np.nanargmax(nrs1_slice), nrs1_slice.shape)
 nrs2_slice = nrs2_data[2500,:,:]
 nrs2_maxindex = np.unravel_index(np.nanargmax(nrs2_slice),nrs2_slice.shape)
 
+print(nrs2_data.shape[0])
+
 print(nrs1_maxindex)
 print(nrs2_maxindex)
 
@@ -96,8 +100,8 @@ c = 3e8
 kb = 1.380649e-23
 
 for i in range(nrs1_wave.shape[0]):
-    #nrs1_Planck[i] = 6e-7*(2*h*c**2)/(nrs1_wave[i]**5)*1/(math.exp((h*c)/(nrs1_wave[i]*kb*Temp))-1)
-    nrs1_Planck[i] = (2*h*c**2)/(nrs1_wave[i]**5)*(1/(math.exp((h*c)/(nrs1_wave[i]*kb*Temp))-1))
+    nrs1_Planck[i] = 6e-7*(2*h*c**2)/(nrs1_wave[i]**5)*1/(math.exp((h*c)/(nrs1_wave[i]*kb*Temp))-1)
+   # nrs1_Planck[i] = (2*h*c**2)/(nrs1_wave[i]**5)*(1/(math.exp((h*c)/(nrs1_wave[i]*kb*Temp))-1))
 
 print((2*h*c**2)/(5e-6**5)*(1/(math.exp((h*c)/(5e-6*kb*Temp))-1)))
 nrs2_Planck = np.zeros(nrs2_wave.shape[0])
@@ -106,8 +110,44 @@ for i in range(nrs2_wave.shape[0]):
     nrs2_Planck[i] = 5e-7*(2*h*c**2)/(nrs2_wave[i]**5)*1/(math.exp((h*c)/(nrs2_wave[i]*kb*Temp))-1)
 
 
+# Looking at a specific interval
+
+low_limit = 3.92e-06
+up_limit = 4.02e-06
+nrs1_lengd = 0
+for i in range(nrs1_wave.shape[0]):
+    if(nrs1_wave[i]>=low_limit and nrs1_wave[i]<= up_limit):
+        nrs1_lengd = nrs1_lengd +1
 
 
+nrs2_lengd = 0
+for i in range(nrs2_wave.shape[0]):
+    if(nrs2_wave[i]>=low_limit and nrs2_wave[i]<= up_limit):
+        nrs2_lengd = nrs2_lengd +1
+
+nrs1_close_wave = np.zeros(nrs1_lengd,dtype='float32')
+nrs1_close_value = np.zeros(nrs1_lengd,dtype='float32')
+count = 0
+for i in range(nrs1_wave.shape[0]):
+    if nrs1_wave[i] >= 3.92e-06 and nrs1_wave[i] <= 4.02e-06:
+        nrs1_close_wave[count] = nrs1_wave[i]
+        nrs1_close_value[count] = nrs1_data[i,nrs1_maxindex[0],nrs1_maxindex[1]]
+        count = count+1
+
+
+nrs2_close_wave = np.zeros(nrs2_lengd,dtype='float32')
+nrs2_close_value = np.zeros(nrs2_lengd,dtype='float32')
+count = 0
+for i in range(nrs2_wave.shape[0]):
+    if nrs2_wave[i] >= 3.92e-06 and nrs2_wave[i] <= 4.02e-06:
+        nrs2_close_wave[count] = nrs2_wave[i]
+        nrs2_close_value[count] = nrs2_data[i,nrs2_maxindex[0],nrs2_maxindex[1]]
+        count = count+1
+
+
+nrs1_smooth_avg = signal.savgol_filter(nrs1_avg, window_length=150, polyorder=3, mode="nearest")
+nrs2_smooth_avg = signal.savgol_filter(nrs2_avg, window_length=250, polyorder=3, mode="nearest")
+nrs1_smooth_close = signal.savgol_filter(nrs1_close_value,window_length=40, polyorder=3, mode="nearest")
 
 plt.figure(1)
 plt.imshow(nrs1_data[1500,:,:])
@@ -128,8 +168,15 @@ plt.plot(nrs2_wave,nrs2_Planck)
 plt.figure(5)
 plt.plot(nrs1_wave,nrs1_avg)
 plt.plot(nrs2_wave,nrs2_avg)
-plt.plot(nrs1_wave,nrs1_Planck)
-plt.plot(nrs2_wave,nrs2_Planck)
+plt.plot(nrs1_wave,nrs1_smooth_avg)
+plt.plot(nrs2_wave,nrs2_smooth_avg)
+
+plt.figure(6)
+plt.plot(nrs1_close_wave,nrs1_close_value)
+plt.plot(nrs1_close_wave,nrs1_smooth_close)
+
+
+
 
 plt.show()
 
