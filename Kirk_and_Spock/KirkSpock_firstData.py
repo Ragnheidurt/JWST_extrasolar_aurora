@@ -21,8 +21,6 @@ nrs2_data = fits.getdata(nrs2,ext=1)
 nrs1_header = fits.getheader(nrs1,ext=1)
 nrs2_header = fits.getheader(nrs2,ext=1)
 
-print(nrs1_header)
-print(nrs2_header)
 
 # Get the start and end wavelengths for both sensors
 nrs1_wavestart = nrs1_header['WAVSTART']
@@ -59,11 +57,6 @@ nrs1_maxindex = np.unravel_index(np.nanargmax(nrs1_slice), nrs1_slice.shape)
 nrs2_slice = nrs2_data[2500,:,:]
 nrs2_maxindex = np.unravel_index(np.nanargmax(nrs2_slice),nrs2_slice.shape)
 
-print(nrs2_data.shape[0])
-
-print(nrs1_maxindex)
-print(nrs2_maxindex)
-
 # Take the average of the brightest pixel and the eight pixels around it
 
 nrs1_avg = np.zeros(nrs1_wave.shape[0])
@@ -78,6 +71,13 @@ for i in range(nrs1_avg.shape[0]):
     if abs(nrs1_avg[i]) > 1e5 and i != 0:
         nrs1_avg[i] = nrs1_avg[i-1]
 
+# Mask the max value and the 8 values around it
+nrs1_blocked_indices = [(a,d),(a,e),(a,f),(b,d),(b,e),(b,f),(c,d),(c,e),(c,f)]
+print(nrs1_blocked_indices)
+nrs1_mask = np.ones_like(nrs1_slice, dtype=bool)
+for idx in nrs1_blocked_indices:
+    nrs1_mask[idx] = False
+
 
 nrs2_avg = np.zeros(nrs2_wave.shape[0])
 a = nrs2_maxindex[0]-1
@@ -91,6 +91,56 @@ for i in range(nrs2_wave.shape[0]):
     if abs(nrs2_avg[i]) > 1e5 and i != 0:
         nrs2_avg[i] = nrs2_avg[i-1]
 
+# Mask the max value and the 8 values around it
+nrs2_blocked_indices = [(a,d),(a,e),(a,f),(b,d),(b,e),(b,f),(c,d),(c,e),(c,f)]
+nrs2_mask = np.ones_like(nrs2_slice, dtype=bool)
+for idx in nrs2_blocked_indices:
+    nrs2_mask[idx] = False
+
+# Calculating the second brightest spot
+nrs1_secmaxindex = np.unravel_index(np.nanargmax(nrs1_slice*nrs1_mask), nrs1_slice.shape)
+nrs2_secmaxindex = np.unravel_index(np.nanargmax(nrs2_slice*nrs2_mask),nrs2_slice.shape)
+
+# Take the average of the second brightest pixel and the eight pixels around it
+nrs1_secavg = np.zeros(nrs1_wave.shape[0])
+a = nrs1_secmaxindex[0]-1
+b = nrs1_secmaxindex[0]
+c = nrs1_secmaxindex[0]+1
+d = nrs1_secmaxindex[1]-1
+e = nrs1_secmaxindex[1]
+f = nrs1_secmaxindex[1]+1
+for i in range(nrs1_avg.shape[0]):
+    nrs1_secavg[i] = (nrs1_data[i,a,d]+nrs1_data[i,a,e]+nrs1_data[i,a,f]+nrs1_data[i,b,d]+nrs1_data[i,b,e]+nrs1_data[i,b,f]+nrs1_data[i,c,d]+nrs1_data[i,c,e]+nrs1_data[i,c,f])/9
+    if abs(nrs1_secavg[i]) > 1e5 and i != 0:
+        nrs1_secavg[i] = nrs1_secavg[i-1]
+
+
+nrs2_secavg = np.zeros(nrs2_wave.shape[0])
+a = nrs2_secmaxindex[0]-1
+b = nrs2_secmaxindex[0]
+c = nrs2_secmaxindex[0]+1
+d = nrs2_secmaxindex[1]-1
+e = nrs2_secmaxindex[1]
+f = nrs2_secmaxindex[1]+1
+for i in range(nrs2_wave.shape[0]):
+    nrs2_secavg[i] = (nrs2_data[i,a,d]+nrs2_data[i,a,e]+nrs2_data[i,a,f]+nrs2_data[i,b,d]+nrs2_data[i,b,e]+nrs2_data[i,b,f]+nrs2_data[i,c,d]+nrs2_data[i,c,e]+nrs2_data[i,c,f])/9
+    if abs(nrs2_secavg[i]) > 1e5 and i != 0:
+        nrs2_secavg[i] = nrs2_secavg[i-1]
+
+
+# Average all pixels 
+nrs1_allavg = np.nanmean(nrs1_data,axis=(1,2))
+nrs2_allavg = np.nanmean(nrs2_data,axis=(1,2))
+
+# Remove the outliers
+for i in range(nrs1_allavg.shape[0]):
+    if i!= 0 and abs(nrs1_allavg[i])> 10:
+        nrs1_allavg[i] = nrs1_allavg[i-1]
+
+for i in range(nrs2_allavg.shape[0]):
+    if i!= 0 and abs(nrs2_allavg[i])>10:
+        nrs2_allavg[i] = nrs2_allavg[i-1]
+
 
 # Calculating the Planck curve
 nrs1_Planck = np.zeros(nrs1_wave.shape[0])
@@ -103,7 +153,6 @@ for i in range(nrs1_wave.shape[0]):
     nrs1_Planck[i] = 6e-7*(2*h*c**2)/(nrs1_wave[i]**5)*1/(math.exp((h*c)/(nrs1_wave[i]*kb*Temp))-1)
    # nrs1_Planck[i] = (2*h*c**2)/(nrs1_wave[i]**5)*(1/(math.exp((h*c)/(nrs1_wave[i]*kb*Temp))-1))
 
-print((2*h*c**2)/(5e-6**5)*(1/(math.exp((h*c)/(5e-6*kb*Temp))-1)))
 nrs2_Planck = np.zeros(nrs2_wave.shape[0])
 
 for i in range(nrs2_wave.shape[0]):
@@ -145,6 +194,8 @@ for i in range(nrs2_wave.shape[0]):
         count = count+1
 
 
+# Smoothing the data
+
 nrs1_smooth_avg = signal.savgol_filter(nrs1_avg, window_length=150, polyorder=3, mode="nearest")
 nrs2_smooth_avg = signal.savgol_filter(nrs2_avg, window_length=250, polyorder=3, mode="nearest")
 nrs1_smooth_close = signal.savgol_filter(nrs1_close_value,window_length=40, polyorder=3, mode="nearest")
@@ -159,21 +210,21 @@ plt.colorbar()
 
 plt.figure(3)
 plt.plot(nrs1_wave,nrs1_avg)
-plt.plot(nrs1_wave,nrs1_Planck)
-
-plt.figure(4)
-plt.plot(nrs2_wave,nrs2_avg)
-plt.plot(nrs2_wave,nrs2_Planck)
-
-plt.figure(5)
-plt.plot(nrs1_wave,nrs1_avg)
 plt.plot(nrs2_wave,nrs2_avg)
 plt.plot(nrs1_wave,nrs1_smooth_avg)
 plt.plot(nrs2_wave,nrs2_smooth_avg)
 
-plt.figure(6)
+plt.figure(4)
 plt.plot(nrs1_close_wave,nrs1_close_value)
 plt.plot(nrs1_close_wave,nrs1_smooth_close)
+
+plt.figure(5)
+plt.plot(nrs1_wave,nrs1_secavg)
+plt.plot(nrs2_wave,nrs2_secavg)
+
+plt.figure(6)
+plt.plot(nrs1_wave,nrs1_allavg)
+plt.plot(nrs2_wave,nrs2_allavg)
 
 
 
