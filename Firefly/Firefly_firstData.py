@@ -49,6 +49,41 @@ for i in range(nrs2_data.shape[0]):
 nrs1_allavg = np.nanmean(nrs1_data,axis=(1))
 nrs2_allavg = np.nanmean(nrs2_data,axis=(1))
 
+# Looking at a close interval
+
+low_limit = 3.92e-06
+up_limit = 4.02e-06
+nrs1_lengd = 0
+for i in range(nrs1_wave.shape[0]):
+    if(nrs1_wave[i]>=low_limit and nrs1_wave[i]<= up_limit):
+        nrs1_lengd = nrs1_lengd +1
+
+
+nrs2_lengd = 0
+for i in range(nrs2_wave.shape[0]):
+    if(nrs2_wave[i]>=low_limit and nrs2_wave[i]<= up_limit):
+        nrs2_lengd = nrs2_lengd +1
+
+nrs1_close_wave = np.zeros(nrs1_lengd,dtype='float32')
+nrs1_close_value = np.zeros((nrs1_data.shape[0],nrs1_lengd))
+count = 0
+for i in range(nrs1_wave.shape[0]):
+    if nrs1_wave[i] >= 3.92e-06 and nrs1_wave[i] <= 4.02e-06:
+        nrs1_close_wave[count] = nrs1_wave[i]
+        nrs1_close_value[:,count] = nrs1_data[:,i]
+        count = count+1
+
+
+nrs2_close_wave = np.zeros(nrs2_lengd,dtype='float32')
+nrs2_close_value = np.zeros((nrs2_data.shape[0],nrs2_lengd))
+count = 0
+for i in range(nrs2_wave.shape[0]):
+    if nrs2_wave[i] >= 3.92e-06 and nrs2_wave[i] <= 4.02e-06:
+        nrs2_close_wave[count] = nrs2_wave[i]
+        nrs2_close_value[:,count] = nrs2_data[:,i]
+        count = count+1
+
+
 
 
 plt.figure(1)
@@ -64,5 +99,9 @@ plt.plot(nrs2_wave,nrs2_data)
 plt.figure(4)
 plt.plot(nrs1_wave,nrs1_allavg)
 plt.plot(nrs2_wave,nrs2_allavg)
+
+plt.figure(5)
+plt.plot(nrs1_close_wave,nrs1_close_value[0])
+plt.plot(nrs2_close_wave,nrs2_close_value[0])
 
 plt.show()
