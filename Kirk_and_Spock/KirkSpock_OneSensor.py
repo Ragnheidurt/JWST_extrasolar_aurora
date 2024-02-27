@@ -9,7 +9,10 @@ from scipy import signal
 
 
 # Read in files from both sensors
-nrs1 = get_pkg_data_filename('MAST_2024-02-27T16_24_08.087Z\MAST_2024-02-27T16_24_08.087Z\JWST\jw01189-o004_t002_nirspec\jw01189-o004_t002_nirspec_g395h-f290lp_s3d.fits')
+#nrs1 = get_pkg_data_filename('MAST_2024-02-27T16_24_08.087Z\MAST_2024-02-27T16_24_08.087Z\JWST\jw01189-o004_t002_nirspec\jw01189-o004_t002_nirspec_g395h-f290lp_s3d.fits')
+#nrs1 = get_pkg_data_filename('MAST_2024-02-27T16_24_08.087Z\MAST_2024-02-27T16_24_08.087Z\JWST\jw01189-o004_t002_nirspec\jw01189-o004_t002_nirspec_g235m-f170lp_s3d.fits')
+#nrs1 = get_pkg_data_filename('MAST_2024-02-27T16_24_08.087Z\MAST_2024-02-27T16_24_08.087Z\JWST\jw01189-o004_t002_nirspec\jw01189-o004_t002_nirspec_g140m-f100lp_s3d.fits')
+nrs1 = get_pkg_data_filename('MAST_2024-01-31T15_21_00.167Z\MAST_2024-01-31T15_21_00.167Z\JWST\jw01189004001_03106_00003\jw01189004001_03106_00003_nrs1_s3d.fits')
 
 
 # Extract the data from the files
@@ -42,7 +45,7 @@ for i in range(nrs1_data.shape[0]):
 
 # Find the brightest spot for each data set
         
-nrs1_slice = nrs1_data[1500,:,:]
+nrs1_slice = nrs1_data[500,:,:]
 nrs1_maxindex = np.unravel_index(np.nanargmax(nrs1_slice), nrs1_slice.shape)
 
 
@@ -138,7 +141,7 @@ nrs1_smooth_avg = signal.savgol_filter(nrs1_avg, window_length=150, polyorder=3,
 nrs1_smooth_close = signal.savgol_filter(nrs1_close_value,window_length=40, polyorder=3, mode="nearest")
 
 plt.figure(1)
-plt.imshow(nrs1_data[1500,:,:])
+plt.imshow(nrs1_data[500,:,:])
 plt.colorbar()
 
 
