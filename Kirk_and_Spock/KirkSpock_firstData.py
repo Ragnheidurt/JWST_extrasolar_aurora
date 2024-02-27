@@ -218,6 +218,8 @@ plt.plot(nrs2_wave,nrs2_smooth_avg)
 plt.figure(4)
 plt.plot(nrs1_close_wave,nrs1_close_value)
 plt.plot(nrs1_close_wave,nrs1_smooth_close)
+plt.axvline(x=3953e-9, color='r', linestyle='--', label='Vertical Line')
+plt.axvline(x=3985.5e-9, color='r', linestyle='--', label='Vertical Line')
 
 plt.figure(5)
 plt.plot(nrs1_wave,nrs1_secavg)
@@ -226,6 +228,8 @@ plt.plot(nrs2_wave,nrs2_secavg)
 plt.figure(6)
 plt.plot(nrs1_wave,nrs1_allavg)
 plt.plot(nrs2_wave,nrs2_allavg)
+plt.axvline(x=3953e-9, color='r', linestyle='--', label='Vertical Line')
+plt.axvline(x=3985.5e-9, color='r', linestyle='--', label='Vertical Line')
 
 
 
