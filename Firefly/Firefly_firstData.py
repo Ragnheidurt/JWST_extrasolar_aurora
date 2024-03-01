@@ -4,8 +4,10 @@ from astropy.utils.data import get_pkg_data_filename
 import numpy as np
 import matplotlib.pyplot as plt
 
-nrs1 = get_pkg_data_filename('MAST_2024-02-07T09_10_43.556Z\MAST_2024-02-07T09_10_43.556Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs1_s2d.fits')
-nrs2 = get_pkg_data_filename('MAST_2024-02-07T09_10_43.556Z\MAST_2024-02-07T09_10_43.556Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs2_s2d.fits')
+nrs1 = get_pkg_data_filename('MAST_2024-02-07T09_10_43.556Z\MAST_2024-02-07T09_10_43.556Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs1_x1d.fits')
+nrs2 = get_pkg_data_filename('MAST_2024-02-07T09_10_43.556Z\MAST_2024-02-07T09_10_43.556Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs2_x1d.fits')
+#nrs1 = get_pkg_data_filename('MAST_2024-02-29T12_33_30.811Z\MAST_2024-02-29T12_33_30.811Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs1_s2d.fits')
+#nrs2 = get_pkg_data_filename('MAST_2024-02-29T12_33_30.811Z\MAST_2024-02-29T12_33_30.811Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs2_s2d.fits')
 
 nrs1_data = fits.getdata(nrs1,ext=1)
 nrs2_data = fits.getdata(nrs2,ext=1)
@@ -14,6 +16,7 @@ nrs1_header = fits.getheader(nrs1,ext=1)
 nrs2_header = fits.getheader(nrs2,ext=1)
 
 # The Wavestart and Wavend come from the header, but the gap is given for the slit S200A1 and G395H F290LP
+
 nrs1_wavestart = nrs1_header['WAVSTART']
 nrs1_wavend = 3.69e-6
 nrs2_wavestart = 3.79e-6
