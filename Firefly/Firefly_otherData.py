@@ -11,8 +11,16 @@ from scipy import signal
 #nrs2 = get_pkg_data_filename('MAST_2024-02-07T09_10_43.556Z\MAST_2024-02-07T09_10_43.556Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs2_x1d.fits')
 #nrs1 = get_pkg_data_filename('MAST_2024-02-14T09_20_36.412Z\MAST_2024-02-14T09_20_36.412Z\JWST\jw01189011001_05101_00003\jw01189011001_05101_00003_nrs1_x1d.fits')
 #nrs2 = get_pkg_data_filename('MAST_2024-02-14T09_20_36.412Z\MAST_2024-02-14T09_20_36.412Z\JWST\jw01189011001_05101_00003\jw01189011001_05101_00003_nrs2_x1d.fits')
-nrs1 = get_pkg_data_filename('MAST_2024-02-29T12_33_30.811Z\MAST_2024-02-29T12_33_30.811Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs1_x1d.fits')
-nrs2 = get_pkg_data_filename('MAST_2024-02-29T12_33_30.811Z\MAST_2024-02-29T12_33_30.811Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs2_x1d.fits')
+#nrs1 = get_pkg_data_filename('MAST_2024-02-29T12_33_30.811Z\MAST_2024-02-29T12_33_30.811Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs1_x1d.fits')
+#nrs2 = get_pkg_data_filename('MAST_2024-02-29T12_33_30.811Z\MAST_2024-02-29T12_33_30.811Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs2_x1d.fits')
+
+#
+#nrs1 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_00_01.250Z\MAST_2024-03-03T17_00_01.250Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs1_x1d.fits')
+#nrs2 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_00_01.250Z\MAST_2024-03-03T17_00_01.250Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs2_x1d.fits')
+#nrs1 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_06_05.404Z\MAST_2024-03-03T17_06_05.404Z\JWST\jw01189011001_05101_00002\jw01189011001_05101_00002_nrs1_x1d.fits')
+#nrs2 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_06_05.404Z\MAST_2024-03-03T17_06_05.404Z\JWST\jw01189011001_05101_00002\jw01189011001_05101_00002_nrs2_x1d.fits')
+nrs1 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_37_11.649Z\MAST_2024-03-03T17_37_11.649Z\JWST\jw01189011001_05101_00003\jw01189011001_05101_00003_nrs1_x1d.fits')
+nrs2 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_37_11.649Z\MAST_2024-03-03T17_37_11.649Z\JWST\jw01189011001_05101_00003\jw01189011001_05101_00003_nrs2_x1d.fits')
 
 # Get the data
 nrs1_data = fits.getdata(nrs1,ext=1)
@@ -63,6 +71,9 @@ for i in range(nrs2_wavelength.shape[0]):
         count = count+1
 
 # Smoothing the data
+nrs1_window_all = int(nrs1_flux.shape[0]*0.2)
+nrs1_window_all = int(nrs2_flux.shape[0]*0.2)
+nrs2_window_close = int(nrs2_close_value.shape[0]*0.2)
 
 nrs1_smooth = signal.savgol_filter(nrs1_flux, window_length=150, polyorder=3, mode="nearest")
 nrs2_smooth = signal.savgol_filter(nrs2_flux, window_length=250, polyorder=3, mode="nearest")
@@ -74,12 +85,16 @@ plt.plot(nrs1_wavelength,nrs1_flux)
 plt.plot(nrs2_wavelength,nrs2_flux)
 plt.plot(nrs1_wavelength,nrs1_smooth)
 plt.plot(nrs2_wavelength,nrs2_smooth)
+plt.xlabel('Wavelength [$\mu$m]')
+plt.ylabel('Brightness')
 
 plt.figure(2)
 plt.plot(nrs2_close_wave,nrs2_close_value)
 plt.plot(nrs2_close_wave,nrs2_smooth_close)
 plt.axvline(x=3.953, color='r', linestyle='--', label='Vertical Line')
 plt.axvline(x=3.9855, color='r', linestyle='--', label='Vertical Line')
+plt.xlabel('Wavelength [$\mu$m]')
+plt.ylabel('Brightness')
 
 plt.show()
 
