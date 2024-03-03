@@ -9,10 +9,20 @@ from scipy import signal
 
 
 # Read in files from both sensors
-nrs1 = get_pkg_data_filename('MAST_2024-01-31T15_21_00.167Z\MAST_2024-01-31T15_21_00.167Z\JWST\jw01189004001_03106_00004\jw01189004001_03106_00004_nrs1_s3d.fits')
-nrs2 = get_pkg_data_filename('MAST_2024-01-31T15_21_00.167Z\MAST_2024-01-31T15_21_00.167Z\JWST\jw01189004001_03106_00004\jw01189004001_03106_00004_nrs2_s3d.fits')
+#nrs1 = get_pkg_data_filename('MAST_2024-01-31T15_21_00.167Z\MAST_2024-01-31T15_21_00.167Z\JWST\jw01189004001_03106_00004\jw01189004001_03106_00004_nrs1_s3d.fits')
+#nrs2 = get_pkg_data_filename('MAST_2024-01-31T15_21_00.167Z\MAST_2024-01-31T15_21_00.167Z\JWST\jw01189004001_03106_00004\jw01189004001_03106_00004_nrs2_s3d.fits')
 #nrs1 = get_pkg_data_filename('MAST_2024-02-20T10_10_20.787Z\MAST_2024-02-20T10_10_20.787Z\JWST\jw01189004001_03106_00001\jw01189004001_03106_00001_nrs1_s3d.fits')
 #nrs2 = get_pkg_data_filename('MAST_2024-02-20T10_10_20.787Z\MAST_2024-02-20T10_10_20.787Z\JWST\jw01189004001_03106_00001\jw01189004001_03106_00001_nrs2_s3d.fits')
+
+#
+#nrs1 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_08_49.109Z\MAST_2024-03-03T22_08_49.109Z\JWST\jw01189004001_03106_00001\jw01189004001_03106_00001_nrs1_s3d.fits')
+#nrs2 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_08_49.109Z\MAST_2024-03-03T22_08_49.109Z\JWST\jw01189004001_03106_00001\jw01189004001_03106_00001_nrs2_s3d.fits')
+#nrs1 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_21_56.858Z\MAST_2024-03-03T22_21_56.858Z\JWST\jw01189004001_03106_00002\jw01189004001_03106_00002_nrs1_s3d.fits')
+#nrs2 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_21_56.858Z\MAST_2024-03-03T22_21_56.858Z\JWST\jw01189004001_03106_00002\jw01189004001_03106_00002_nrs2_s3d.fits')
+#nrs1 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_33_25.304Z\MAST_2024-03-03T22_33_25.304Z\JWST\jw01189004001_03106_00003\jw01189004001_03106_00003_nrs1_s3d.fits')
+#nrs2 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_33_25.304Z\MAST_2024-03-03T22_33_25.304Z\JWST\jw01189004001_03106_00003\jw01189004001_03106_00003_nrs2_s3d.fits')
+nrs1 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_40_03.977Z\MAST_2024-03-03T22_40_03.977Z\JWST\jw01189004001_03106_00004\jw01189004001_03106_00004_nrs1_s3d.fits')
+nrs2 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_40_03.977Z\MAST_2024-03-03T22_40_03.977Z\JWST\jw01189004001_03106_00004\jw01189004001_03106_00004_nrs2_s3d.fits')
 
 # Extract the data from the files
 nrs1_data = fits.getdata(nrs1,ext=1)
@@ -72,6 +82,8 @@ for i in range(nrs1_avg.shape[0]):
     nrs1_avg[i] = (nrs1_data[i,a,d]+nrs1_data[i,a,e]+nrs1_data[i,a,f]+nrs1_data[i,b,d]+nrs1_data[i,b,e]+nrs1_data[i,b,f]+nrs1_data[i,c,d]+nrs1_data[i,c,e]+nrs1_data[i,c,f])/9
     if abs(nrs1_avg[i]) > 1e5 and i != 0:
         nrs1_avg[i] = nrs1_avg[i-1]
+    elif nrs1_avg[i]<10 and i != 0:
+        nrs1_avg[i] = nrs1_avg[i-1]
 
 # Mask the max value and the 8 values around it
 nrs1_blocked_indices = [(a,d),(a,e),(a,f),(b,d),(b,e),(b,f),(c,d),(c,e),(c,f)]
@@ -91,6 +103,8 @@ f = nrs2_maxindex[1]+1
 for i in range(nrs2_wave.shape[0]):
     nrs2_avg[i] = (nrs2_data[i,a,d]+nrs2_data[i,a,e]+nrs2_data[i,a,f]+nrs2_data[i,b,d]+nrs2_data[i,b,e]+nrs2_data[i,b,f]+nrs2_data[i,c,d]+nrs2_data[i,c,e]+nrs2_data[i,c,f])/9
     if abs(nrs2_avg[i]) > 1e5 and i != 0:
+        nrs2_avg[i] = nrs2_avg[i-1]
+    elif nrs2_avg[i]<10 and i != 0:
         nrs2_avg[i] = nrs2_avg[i-1]
 
 # Mask the max value and the 8 values around it
@@ -182,7 +196,8 @@ count = 0
 for i in range(nrs1_wave.shape[0]):
     if nrs1_wave[i] >= 3.92e-06 and nrs1_wave[i] <= 4.02e-06:
         nrs1_close_wave[count] = nrs1_wave[i]
-        nrs1_close_value[count] = nrs1_data[i,nrs1_maxindex[0],nrs1_maxindex[1]]
+        #nrs1_close_value[count] = nrs1_data[i,nrs1_maxindex[0],nrs1_maxindex[1]]
+        nrs1_close_value[count] = nrs1_avg[i]
         count = count+1
 
 
@@ -192,7 +207,8 @@ count = 0
 for i in range(nrs2_wave.shape[0]):
     if nrs2_wave[i] >= 3.92e-06 and nrs2_wave[i] <= 4.02e-06:
         nrs2_close_wave[count] = nrs2_wave[i]
-        nrs2_close_value[count] = nrs2_data[i,nrs2_maxindex[0],nrs2_maxindex[1]]
+        #nrs2_close_value[count] = nrs2_data[i,nrs2_maxindex[0],nrs2_maxindex[1]]
+        nrs2_close_value[count] = nrs2_avg[i]
         count = count+1
 
 
@@ -201,6 +217,7 @@ for i in range(nrs2_wave.shape[0]):
 nrs1_smooth_avg = signal.savgol_filter(nrs1_avg, window_length=150, polyorder=3, mode="nearest")
 nrs2_smooth_avg = signal.savgol_filter(nrs2_avg, window_length=250, polyorder=3, mode="nearest")
 nrs1_smooth_close = signal.savgol_filter(nrs1_close_value,window_length=40, polyorder=3, mode="nearest")
+nrs2_smooth_close = signal.savgol_filter(nrs2_close_value,window_length=40, polyorder=3,mode="nearest")
 
 plt.figure(1)
 plt.imshow(nrs1_data[1500,:,:])
@@ -215,22 +232,32 @@ plt.plot(nrs1_wave,nrs1_avg)
 plt.plot(nrs2_wave,nrs2_avg)
 plt.plot(nrs1_wave,nrs1_smooth_avg)
 plt.plot(nrs2_wave,nrs2_smooth_avg)
+plt.xlabel('Wavelength [$\mu$m]')
+plt.ylabel('Brightness')
 
 plt.figure(4)
 plt.plot(nrs1_close_wave,nrs1_close_value)
 plt.plot(nrs1_close_wave,nrs1_smooth_close)
+plt.plot(nrs2_close_wave,nrs2_close_value)
+plt.plot(nrs2_close_wave,nrs2_smooth_close)
 plt.axvline(x=3953e-9, color='r', linestyle='--', label='Vertical Line')
 plt.axvline(x=3985.5e-9, color='r', linestyle='--', label='Vertical Line')
+plt.xlabel('Wavelength [$\mu$m]')
+plt.ylabel('Brightness')
 
 plt.figure(5)
 plt.plot(nrs1_wave,nrs1_secavg)
 plt.plot(nrs2_wave,nrs2_secavg)
+plt.xlabel('Wavelength [$\mu$m]')
+plt.ylabel('Brightness')
 
 plt.figure(6)
 plt.plot(nrs1_wave,nrs1_allavg)
 plt.plot(nrs2_wave,nrs2_allavg)
 plt.axvline(x=3953e-9, color='r', linestyle='--', label='Vertical Line')
 plt.axvline(x=3985.5e-9, color='r', linestyle='--', label='Vertical Line')
+plt.xlabel('Wavelength [$\mu$m]')
+plt.ylabel('Brightness')
 
 
 
