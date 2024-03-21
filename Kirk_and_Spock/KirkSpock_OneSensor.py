@@ -6,12 +6,15 @@ import matplotlib.pyplot as plt
 import math
 from scipy.signal import savgol_filter
 from scipy import signal
+import sys
+sys.path.append('C:/Users/dansf/OneDrive/Documents/KTH/Thesis/Code/JWST_extrasolar_aurora/Functions')
+from average_errors import average_errors
 
 
 # Read in files from both sensors
-#nrs1 = get_pkg_data_filename('MAST_2024-02-27T16_24_08.087Z\MAST_2024-02-27T16_24_08.087Z\JWST\jw01189-o004_t002_nirspec\jw01189-o004_t002_nirspec_g395h-f290lp_s3d.fits')
+nrs1 = get_pkg_data_filename('MAST_2024-02-27T16_24_08.087Z\MAST_2024-02-27T16_24_08.087Z\JWST\jw01189-o004_t002_nirspec\jw01189-o004_t002_nirspec_g395h-f290lp_s3d.fits')
 #nrs1 = get_pkg_data_filename('MAST_2024-02-27T16_24_08.087Z\MAST_2024-02-27T16_24_08.087Z\JWST\jw01189-o004_t002_nirspec\jw01189-o004_t002_nirspec_g235m-f170lp_s3d.fits')
-nrs1 = get_pkg_data_filename('MAST_2024-02-27T16_24_08.087Z\MAST_2024-02-27T16_24_08.087Z\JWST\jw01189-o004_t002_nirspec\jw01189-o004_t002_nirspec_g140m-f100lp_s3d.fits')
+#nrs1 = get_pkg_data_filename('MAST_2024-02-27T16_24_08.087Z\MAST_2024-02-27T16_24_08.087Z\JWST\jw01189-o004_t002_nirspec\jw01189-o004_t002_nirspec_g140m-f100lp_s3d.fits')
 #nrs1 = get_pkg_data_filename('MAST_2024-01-31T15_21_00.167Z\MAST_2024-01-31T15_21_00.167Z\JWST\jw01189004001_03106_00003\jw01189004001_03106_00003_nrs1_s3d.fits')
 
 #
@@ -142,8 +145,10 @@ for i in range(nrs1_wave.shape[0]):
 nrs1_window_all = int(nrs1_avg.shape[0]*0.2)
 nrs1_window_close = int(nrs1_close_value.shape[0]*0.2)
 nrs1_smooth_avg = signal.savgol_filter(nrs1_avg, window_length=nrs1_window_all, polyorder=3, mode="nearest")
-#nrs1_smooth_close = signal.savgol_filter(nrs1_close_value,window_length=nrs1_window_close, polyorder=3, mode="nearest")
-nrs1_smooth_close = signal.savgol_filter(nrs1_close_value,window_length = 5, polyorder=3, mode="nearest")
+nrs1_smooth_close = signal.savgol_filter(nrs1_close_value,window_length=nrs1_window_close, polyorder=3, mode="nearest")
+#nrs1_smooth_close = signal.savgol_filter(nrs1_close_value,window_length = 5, polyorder=3, mode="nearest")
+
+#nrs1_wave_average, nrs1_average, nrs_error_average = 
 
 
 plt.figure(1)
