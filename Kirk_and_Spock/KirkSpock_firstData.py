@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 import math
 from scipy.signal import savgol_filter
 from scipy import signal
+import sys
+sys.path.append('C:/Users/dansf/OneDrive/Documents/KTH/Thesis/Code/JWST_extrasolar_aurora/Functions')
+from average_errors import average_errors
+from short_interval import short_interval
 
 
 # Read in files from both sensors
@@ -19,20 +23,22 @@ from scipy import signal
 #nrs2 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_08_49.109Z\MAST_2024-03-03T22_08_49.109Z\JWST\jw01189004001_03106_00001\jw01189004001_03106_00001_nrs2_s3d.fits')
 #nrs1 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_21_56.858Z\MAST_2024-03-03T22_21_56.858Z\JWST\jw01189004001_03106_00002\jw01189004001_03106_00002_nrs1_s3d.fits')
 #nrs2 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_21_56.858Z\MAST_2024-03-03T22_21_56.858Z\JWST\jw01189004001_03106_00002\jw01189004001_03106_00002_nrs2_s3d.fits')
-#nrs1 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_33_25.304Z\MAST_2024-03-03T22_33_25.304Z\JWST\jw01189004001_03106_00003\jw01189004001_03106_00003_nrs1_s3d.fits')
-#nrs2 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_33_25.304Z\MAST_2024-03-03T22_33_25.304Z\JWST\jw01189004001_03106_00003\jw01189004001_03106_00003_nrs2_s3d.fits')
-nrs1 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_40_03.977Z\MAST_2024-03-03T22_40_03.977Z\JWST\jw01189004001_03106_00004\jw01189004001_03106_00004_nrs1_s3d.fits')
-nrs2 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_40_03.977Z\MAST_2024-03-03T22_40_03.977Z\JWST\jw01189004001_03106_00004\jw01189004001_03106_00004_nrs2_s3d.fits')
+nrs1 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_33_25.304Z\MAST_2024-03-03T22_33_25.304Z\JWST\jw01189004001_03106_00003\jw01189004001_03106_00003_nrs1_s3d.fits')
+nrs2 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_33_25.304Z\MAST_2024-03-03T22_33_25.304Z\JWST\jw01189004001_03106_00003\jw01189004001_03106_00003_nrs2_s3d.fits')
+#nrs1 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_40_03.977Z\MAST_2024-03-03T22_40_03.977Z\JWST\jw01189004001_03106_00004\jw01189004001_03106_00004_nrs1_s3d.fits')
+#nrs2 = get_pkg_data_filename('Data\Private_data\MAST_2024-03-03T22_40_03.977Z\MAST_2024-03-03T22_40_03.977Z\JWST\jw01189004001_03106_00004\jw01189004001_03106_00004_nrs2_s3d.fits')
 
 # Extract the data from the files
 nrs1_data = fits.getdata(nrs1,ext=1)
 nrs2_data = fits.getdata(nrs2,ext=1)
+nrs1_error = fits.getdata(nrs1,ext=2)
 
 # Extract header for both data sets
 nrs1_header = fits.getheader(nrs1,ext=1)
 nrs2_header = fits.getheader(nrs2,ext=1)
+error_header = fits.getheader(nrs1,ext=2)
 
-print(nrs1_header)
+print(error_header)
 # Get the start and end wavelengths for both sensors
 nrs1_wavestart = nrs1_header['WAVSTART']
 nrs1_wavend = nrs1_header['WAVEND']
@@ -176,9 +182,13 @@ for i in range(nrs2_wave.shape[0]):
 
 
 # Looking at a specific interval
-
+    
+low_limit = 3.983e-06
+up_limit = 3.997e-06
+'''
 low_limit = 3.92e-06
 up_limit = 4.02e-06
+'''
 nrs1_lengd = 0
 for i in range(nrs1_wave.shape[0]):
     if(nrs1_wave[i]>=low_limit and nrs1_wave[i]<= up_limit):
@@ -194,7 +204,7 @@ nrs1_close_wave = np.zeros(nrs1_lengd,dtype='float32')
 nrs1_close_value = np.zeros(nrs1_lengd,dtype='float32')
 count = 0
 for i in range(nrs1_wave.shape[0]):
-    if nrs1_wave[i] >= 3.92e-06 and nrs1_wave[i] <= 4.02e-06:
+    if nrs1_wave[i] >= low_limit and nrs1_wave[i] <= up_limit:
         nrs1_close_wave[count] = nrs1_wave[i]
         #nrs1_close_value[count] = nrs1_data[i,nrs1_maxindex[0],nrs1_maxindex[1]]
         nrs1_close_value[count] = nrs1_avg[i]
@@ -205,10 +215,50 @@ nrs2_close_wave = np.zeros(nrs2_lengd,dtype='float32')
 nrs2_close_value = np.zeros(nrs2_lengd,dtype='float32')
 count = 0
 for i in range(nrs2_wave.shape[0]):
-    if nrs2_wave[i] >= 3.92e-06 and nrs2_wave[i] <= 4.02e-06:
+    if nrs2_wave[i] >= low_limit and nrs2_wave[i] <= up_limit:
         nrs2_close_wave[count] = nrs2_wave[i]
         #nrs2_close_value[count] = nrs2_data[i,nrs2_maxindex[0],nrs2_maxindex[1]]
         nrs2_close_value[count] = nrs2_avg[i]
+        count = count+1
+
+# Looking at a specific interval
+'''
+low_limit = 3.92e-06
+up_limit = 4.02e-06
+
+low_limit = 3.983e-06
+up_limit = 3.997e-06
+'''
+nrs1_lengd = 0
+for i in range(nrs1_wave.shape[0]):
+    if(nrs1_wave[i]>=low_limit and nrs1_wave[i]<= up_limit):
+        nrs1_lengd = nrs1_lengd +1
+
+
+nrs2_lengd = 0
+for i in range(nrs2_wave.shape[0]):
+    if(nrs2_wave[i]>=low_limit and nrs2_wave[i]<= up_limit):
+        nrs2_lengd = nrs2_lengd +1
+
+nrs1_close_secwave = np.zeros(nrs1_lengd,dtype='float32')
+nrs1_close_secvalue = np.zeros(nrs1_lengd,dtype='float32')
+count = 0
+for i in range(nrs1_wave.shape[0]):
+    if nrs1_wave[i] >= low_limit and nrs1_wave[i] <= up_limit:
+        nrs1_close_secwave[count] = nrs1_wave[i]
+        #nrs1_close_value[count] = nrs1_data[i,nrs1_maxindex[0],nrs1_maxindex[1]]
+        nrs1_close_secvalue[count] = nrs1_secavg[i]
+        count = count+1
+
+
+nrs2_close_secwave = np.zeros(nrs2_lengd,dtype='float32')
+nrs2_close_secvalue = np.zeros(nrs2_lengd,dtype='float32')
+count = 0
+for i in range(nrs2_wave.shape[0]):
+    if nrs2_wave[i] >= low_limit and nrs2_wave[i] <= up_limit:
+        nrs2_close_secwave[count] = nrs2_wave[i]
+        #nrs2_close_value[count] = nrs2_data[i,nrs2_maxindex[0],nrs2_maxindex[1]]
+        nrs2_close_secvalue[count] = nrs2_secavg[i]
         count = count+1
 
 
@@ -218,9 +268,21 @@ nrs1_smooth_avg = signal.savgol_filter(nrs1_avg, window_length=150, polyorder=3,
 nrs2_smooth_avg = signal.savgol_filter(nrs2_avg, window_length=250, polyorder=3, mode="nearest")
 nrs1_smooth_close = signal.savgol_filter(nrs1_close_value,window_length=40, polyorder=3, mode="nearest")
 nrs2_smooth_close = signal.savgol_filter(nrs2_close_value,window_length=40, polyorder=3,mode="nearest")
+nrs1_smooth_secavg = signal.savgol_filter(nrs1_secavg, window_length=150, polyorder=3, mode="nearest")
+nrs2_smooth_secavg = signal.savgol_filter(nrs2_secavg, window_length=250, polyorder=3, mode="nearest")
+nrs1_smooth_allavg = signal.savgol_filter(nrs1_allavg, window_length=150, polyorder=3, mode="nearest")
+nrs2_smooth_allavg = signal.savgol_filter(nrs2_allavg, window_length=250, polyorder=3, mode="nearest")
+
+#divisors = [i for i in range(1, nrs1_avg.shape[0] + 1) if nrs1_avg.shape[0] % i == 0]
+
+#nrs1_flux_error = nrs1_error[nrs1_maxindex[0],nrs1_maxindex[1],:]
+
+#nrs1_wave_average, nrs1_average, nrs1_error_average = average_errors(nrs1_wave,nrs1_avg,nrs1_flux_error,divisors[2])
+#nrs1_short_wave, nrs1_short_flux = short_interval(nrs1_avg,low_limit,up_limit,nrs1_wave)
+
 
 plt.figure(1)
-plt.imshow(nrs1_data[1500,:,:])
+plt.imshow(nrs1_data[2500,:,:])
 plt.colorbar()
 
 plt.figure(2)
@@ -237,28 +299,45 @@ plt.ylabel('Brightness')
 
 plt.figure(4)
 plt.plot(nrs1_close_wave,nrs1_close_value)
-plt.plot(nrs1_close_wave,nrs1_smooth_close)
 plt.plot(nrs2_close_wave,nrs2_close_value)
-plt.plot(nrs2_close_wave,nrs2_smooth_close)
-plt.axvline(x=3953e-9, color='r', linestyle='--', label='Vertical Line')
+#plt.axvline(x=3985.5e-9, color='r', linestyle='--', label='Vertical Line')
+#plt.axvline(x=3994.8e-9, color='r', linestyle='--', label='Vertical Line')
 plt.axvline(x=3985.5e-9, color='r', linestyle='--', label='Vertical Line')
 plt.xlabel('Wavelength [$\mu$m]')
 plt.ylabel('Brightness')
 
 plt.figure(5)
-plt.plot(nrs1_wave,nrs1_secavg)
-plt.plot(nrs2_wave,nrs2_secavg)
+plt.plot(nrs1_close_wave,nrs1_close_secvalue)
+plt.plot(nrs2_close_wave,nrs2_close_secvalue)
+#plt.axvline(x=3985.5e-9, color='r', linestyle='--', label='Vertical Line')
+plt.axvline(x=3994.8e-9, color='r', linestyle='--', label='Vertical Line')
 plt.xlabel('Wavelength [$\mu$m]')
 plt.ylabel('Brightness')
 
 plt.figure(6)
-plt.plot(nrs1_wave,nrs1_allavg)
-plt.plot(nrs2_wave,nrs2_allavg)
-plt.axvline(x=3953e-9, color='r', linestyle='--', label='Vertical Line')
-plt.axvline(x=3985.5e-9, color='r', linestyle='--', label='Vertical Line')
+plt.plot(nrs1_wave,nrs1_secavg)
+plt.plot(nrs2_wave,nrs2_secavg)
+plt.plot(nrs1_wave,nrs1_smooth_secavg)
+plt.plot(nrs2_wave,nrs2_smooth_secavg)
 plt.xlabel('Wavelength [$\mu$m]')
 plt.ylabel('Brightness')
 
+
+
+plt.figure(7)
+plt.plot(nrs1_wave,nrs1_allavg)
+plt.plot(nrs2_wave,nrs2_allavg)
+plt.plot(nrs1_wave,nrs1_smooth_allavg)
+plt.plot(nrs2_wave,nrs2_smooth_allavg)
+plt.xlabel('Wavelength [$\mu$m]')
+plt.ylabel('Brightness')
+
+plt.figure(8)
+
+plt.plot(nrs1_wave,nrs1_smooth_avg)
+plt.plot(nrs2_wave,nrs2_smooth_avg)
+plt.plot(nrs1_wave,nrs1_smooth_secavg)
+plt.plot(nrs2_wave,nrs2_smooth_secavg)
 
 
 
