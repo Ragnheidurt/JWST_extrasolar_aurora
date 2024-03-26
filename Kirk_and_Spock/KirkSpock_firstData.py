@@ -10,6 +10,9 @@ import sys
 sys.path.append('C:/Users/dansf/OneDrive/Documents/KTH/Thesis/Code/JWST_extrasolar_aurora/Functions')
 from average_errors import average_errors
 from short_interval import short_interval
+from model_data import model_data
+from model_data import model_shortening
+from scale_model import scale_model
 
 
 # Read in files from both sensors
@@ -183,8 +186,10 @@ for i in range(nrs2_wave.shape[0]):
 
 # Looking at a specific interval
     
-low_limit = 3.983e-06
-up_limit = 3.997e-06
+low_limit = 3.5e-06
+up_limit = 4.5e-06
+'''low_limit = 3.983e-06
+up_limit = 3.997e-06'''
 '''
 low_limit = 3.92e-06
 up_limit = 4.02e-06
@@ -280,6 +285,10 @@ nrs2_smooth_allavg = signal.savgol_filter(nrs2_allavg, window_length=250, polyor
 #nrs1_wave_average, nrs1_average, nrs1_error_average = average_errors(nrs1_wave,nrs1_avg,nrs1_flux_error,divisors[2])
 #nrs1_short_wave, nrs1_short_flux = short_interval(nrs1_avg,low_limit,up_limit,nrs1_wave)
 
+wavenumber, absorption_intensity1, vacuum_wavelength, column_density, stuff = model_data('C:/Users/dansf/OneDrive/Documents/KTH/Thesis/Code/JWST-Jupiter/Jupiter/Data/h3_generated1.txt')
+scaled_model = scale_model(column_density,nrs2_avg,vacuum_wavelength,nrs2_wave)
+model_wave_short,model_flux_short = model_shortening(vacuum_wavelength, low_limit, up_limit, scaled_model)
+
 
 plt.figure(1)
 plt.imshow(nrs1_data[2500,:,:])
@@ -294,12 +303,14 @@ plt.plot(nrs1_wave,nrs1_avg)
 plt.plot(nrs2_wave,nrs2_avg)
 plt.plot(nrs1_wave,nrs1_smooth_avg)
 plt.plot(nrs2_wave,nrs2_smooth_avg)
+plt.plot(vacuum_wavelength,scaled_model,color='red', linestyle='--', alpha=0.5)
 plt.xlabel('Wavelength [$\mu$m]')
 plt.ylabel('Brightness')
 
 plt.figure(4)
 plt.plot(nrs1_close_wave,nrs1_close_value)
 plt.plot(nrs2_close_wave,nrs2_close_value)
+plt.plot(model_wave_short,model_flux_short,color='red', linestyle='--', alpha=0.5)
 #plt.axvline(x=3985.5e-9, color='r', linestyle='--', label='Vertical Line')
 #plt.axvline(x=3994.8e-9, color='r', linestyle='--', label='Vertical Line')
 plt.axvline(x=3985.5e-9, color='r', linestyle='--', label='Vertical Line')
