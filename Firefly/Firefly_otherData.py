@@ -5,6 +5,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
 import math
+import sys
+sys.path.append('C:/Users/dansf/OneDrive/Documents/KTH/Thesis/Code/JWST_extrasolar_aurora/Functions')
+from average_errors import average_errors
+from short_interval import short_interval
+from model_data import model_data
+from model_data import model_shortening
+from scale_model import scale_model
 
 
 # Import data files
@@ -18,10 +25,10 @@ import math
 #
 #nrs1 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_00_01.250Z\MAST_2024-03-03T17_00_01.250Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs1_x1d.fits')
 #nrs2 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_00_01.250Z\MAST_2024-03-03T17_00_01.250Z\JWST\jw01189011001_05101_00001\jw01189011001_05101_00001_nrs2_x1d.fits')
-nrs1 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_06_05.404Z\MAST_2024-03-03T17_06_05.404Z\JWST\jw01189011001_05101_00002\jw01189011001_05101_00002_nrs1_x1d.fits')
-nrs2 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_06_05.404Z\MAST_2024-03-03T17_06_05.404Z\JWST\jw01189011001_05101_00002\jw01189011001_05101_00002_nrs2_x1d.fits')
-#nrs1 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_37_11.649Z\MAST_2024-03-03T17_37_11.649Z\JWST\jw01189011001_05101_00003\jw01189011001_05101_00003_nrs1_x1d.fits')
-#nrs2 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_37_11.649Z\MAST_2024-03-03T17_37_11.649Z\JWST\jw01189011001_05101_00003\jw01189011001_05101_00003_nrs2_x1d.fits')
+#nrs1 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_06_05.404Z\MAST_2024-03-03T17_06_05.404Z\JWST\jw01189011001_05101_00002\jw01189011001_05101_00002_nrs1_x1d.fits')
+#nrs2 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_06_05.404Z\MAST_2024-03-03T17_06_05.404Z\JWST\jw01189011001_05101_00002\jw01189011001_05101_00002_nrs2_x1d.fits')
+nrs1 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_37_11.649Z\MAST_2024-03-03T17_37_11.649Z\JWST\jw01189011001_05101_00003\jw01189011001_05101_00003_nrs1_x1d.fits')
+nrs2 = get_pkg_data_filename('Data\private_data\MAST_2024-03-03T17_37_11.649Z\MAST_2024-03-03T17_37_11.649Z\JWST\jw01189011001_05101_00003\jw01189011001_05101_00003_nrs2_x1d.fits')
 
 # Get the data
 nrs1_data = fits.getdata(nrs1,ext=1)
@@ -30,6 +37,7 @@ nrs2_data = fits.getdata(nrs2,ext=1)
 # Get the header of the data
 nrs1_header = fits.getheader(nrs1,ext=1)
 nrs2_header = fits.getheader(nrs2,ext=1)
+print(nrs1_header)
 
 #print(nrs1_data.dtype)
 
@@ -50,8 +58,8 @@ nrs2_flux_error = nrs2_data['FLUX_ERROR']
 low_limit = 3.992
 up_limit = 3.996
 '''
-low_limit = 4.010
-up_limit = 4.014
+low_limit = 3.0
+up_limit = 3.5
 
 nrs1_lengd = 0
 for i in range(nrs1_wavelength.shape[0]):
@@ -147,6 +155,29 @@ for i in range(nrs2_average.shape[0]):
     nrs2_error_average[i] = math.sqrt(sum)
     count = count + size
 
+wavenumber, absorption_intensity1, vacuum_wavelength, column_density, stuff = model_data('C:/Users/dansf/OneDrive/Documents/KTH/Thesis/Code/JWST-Jupiter/Jupiter/Data/h3_generated1.txt')
+vacuum_wavelength = vacuum_wavelength*1e6
+#scaled_model = scale_model(absorption_intensity1,nrs1_flux, nrs2_flux,vacuum_wavelength,nrs2_wavelength)
+print(nrs1_wavelength)
+nrs1_dist = nrs2_wavelength[-1]-nrs1_wavelength[0]
+nrs1_interval = nrs1_dist/(nrs1_data.shape[0]+nrs2_data.shape[0])
+
+
+# Create array with wavelength
+nrs1_wave = np.zeros((nrs1_data.shape[0]+nrs2_data.shape[0]))
+
+for i in range(nrs1_data.shape[0]+nrs2_data.shape[0]):
+    if i != 0: 
+        nrs1_wave[i] = nrs1_wave[i-1] + nrs1_interval
+    else:
+        nrs1_wave[i] = nrs1_wavelength[0]
+
+print(nrs1_wave.shape[0])
+print(type(nrs2_flux))
+null = np.zeros(nrs1_flux.shape[0])
+flux2_for_scale = np.concatenate((null,nrs2_flux))
+scaled_model = scale_model(absorption_intensity1,nrs1_flux, flux2_for_scale,vacuum_wavelength,nrs1_wave)
+model_wave_short,model_flux_short = model_shortening(vacuum_wavelength, low_limit, up_limit, scaled_model)
 
 
 plt.figure(1)
@@ -154,15 +185,18 @@ plt.plot(nrs1_wavelength,nrs1_flux)
 plt.plot(nrs2_wavelength,nrs2_flux)
 plt.plot(nrs1_wavelength,nrs1_smooth)
 plt.plot(nrs2_wavelength,nrs2_smooth)
-plt.fill_between(nrs1_wavelength,nrs1_flux-nrs1_flux_error, nrs1_flux+nrs1_flux_error,alpha = 0.5, label='error')
+#plt.plot(vacuum_wavelength,scaled_model,alpha=0.5, linestyle='--')
+#plt.fill_between(nrs1_wavelength,nrs1_flux-nrs1_flux_error, nrs1_flux+nrs1_flux_error,alpha = 0.5, label='error')
 plt.xlabel('Wavelength [$\mu$m]')
 plt.ylabel('Brightness')
 
 plt.figure(2)
+plt.plot(nrs1_close_wave,nrs1_close_value)
 plt.plot(nrs2_close_wave,nrs2_close_value)
 plt.plot(nrs2_close_wave,nrs2_smooth_close)
-plt.axvline(x=4.0132, color='r', linestyle='--', label='Vertical Line')
-plt.axvline(x=4.0119, color='r', linestyle='--', label='Vertical Line')
+#plt.plot(model_wave_short,model_flux_short, alpha=0.5, linestyle='--')
+#plt.axvline(x=4.0132, color='r', linestyle='--', label='Vertical Line')
+#plt.axvline(x=4.0119, color='r', linestyle='--', label='Vertical Line')
 #plt.axvline(x=3.9945, color='r', linestyle='--', label='Vertical Line')
 plt.xlabel('Wavelength [$\mu$m]')
 plt.ylabel('Brightness')
